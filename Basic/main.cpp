@@ -1,10 +1,11 @@
 #include <cox.h>
 
-// Timer timerHello;
-//
-// static void taskHello(void *) {
-//   printf("Hello World!\n");
-// }
+Timer timerHello;
+
+static void taskHello(void *) {
+  Serial.printf("Hello World!\n");
+  digitalToggle(PB14);
+}
 
 static void eventSerialRx(SerialPort &p) {
   while (p.available() > 0) {
@@ -33,6 +34,6 @@ void setup() {
   Serial2.onReceive(eventSerialRx);
   Serial2.listen();
 
-  // timerHello.onFired(taskHello, NULL);
-  // timerHello.startPeriodic(1000);
+  timerHello.onFired(taskHello, NULL);
+  timerHello.startPeriodic(1000);
 }
