@@ -3,8 +3,11 @@
 Timer timerHello;
 
 static void taskHello(void *) {
-  Serial.println(); Serial.println("Serial) Hello World!");
-  Serial2.println(); Serial2.println("Serial2) Hello World!");
+  Serial.println();
+  Serial.println("Serial) Hello World!");
+  Serial2.println();
+  Serial2.println("Serial2) Hello World!");
+  SerialUSB.println();
   SerialUSB.printf("SerialUSB) Hello World!\n");
   digitalToggle(PB14);
 }
