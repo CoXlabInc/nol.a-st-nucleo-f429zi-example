@@ -3,7 +3,9 @@
 Timer timerHello;
 
 static void taskHello(void *) {
-  Serial.printf("Hello World!\n");
+  Serial.println(); Serial.println("Serial) Hello World!");
+  Serial2.println(); Serial2.println("Serial2) Hello World!");
+  SerialUSB.printf("SerialUSB) Hello World!\n");
   digitalToggle(PB14);
 }
 
@@ -33,6 +35,11 @@ void setup() {
   Serial2.println("*** [ST Nucleo-F429ZI] Basic Functions ***");
   Serial2.onReceive(eventSerialRx);
   Serial2.listen();
+
+  SerialUSB.begin();
+  SerialUSB.println("*** [ST Nucleo-F429ZI] Basic Functions ***");
+  SerialUSB.onReceive(eventSerialRx);
+  SerialUSB.listen();
 
   timerHello.onFired(taskHello, NULL);
   timerHello.startPeriodic(1000);
