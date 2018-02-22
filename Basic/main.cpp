@@ -11,10 +11,18 @@ Timer timerHello;
 USBD_HandleTypeDef usb;
 
 static void taskHello(void *) {
-  Serial.println();
   Serial.println("Serial) Hello World!");
-  Serial2.println();
   Serial2.println("Serial2) Hello World!");
+
+  Serial.printf("A0:%5d mV, ", map(analogRead(A0), 0, 4095, 0, 3300));
+  Serial.printf("A1:%5d mV, ", map(analogRead(A1), 0, 4095, 0, 3300));
+  Serial.printf("A2:%5d mV, ", map(analogRead(A2), 0, 4095, 0, 3300));
+  Serial.printf("A3:%5d mV, ", map(analogRead(A3), 0, 4095, 0, 3300));
+  Serial.printf("A4:%5d mV, ", map(analogRead(A4), 0, 4095, 0, 3300));
+  Serial.printf("A5:%5d mV, ", map(analogRead(A5), 0, 4095, 0, 3300));
+  Serial.printf("A6:%5d mV, ", map(analogRead(A6), 0, 4095, 0, 3300));
+  Serial.printf("A7:%5d mV, ", map(analogRead(A7), 0, 4095, 0, 3300));
+  Serial.printf("A8:%5d mV\n", map(analogRead(A8), 0, 4095, 0, 3300));
 
   digitalToggle(PB14);
 }
@@ -59,7 +67,6 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println("*** [ST Nucleo-F429ZI] Basic Functions ***");
-  Serial.flush();
   Serial.onReceive(eventSerialRx);
   #ifndef MEASURE_CURRENT_IN_SLEEP
   Serial.listen();
@@ -67,7 +74,6 @@ void setup() {
 
   Serial2.begin(115200);
   Serial2.println("*** [ST Nucleo-F429ZI] Basic Functions ***");
-  Serial2.flush();
   Serial2.onReceive(eventSerialRx);
   #ifndef MEASURE_CURRENT_IN_SLEEP
   Serial2.listen();
