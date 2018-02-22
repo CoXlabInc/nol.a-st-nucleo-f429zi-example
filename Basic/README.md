@@ -1,1 +1,5 @@
+# Basic Functions Test
+
+This is an example project for [ST-Nucleo-F429ZI|http://www.coxlab.kr/doxygen/Nol.A-SDK/group__STNucleoF429ZI.html] board.
+
 ![Wiring](wiring.jpg)
