@@ -1,8 +1,12 @@
 #include <cox.h>
+
+//! [How to declare]
 #include <stm32f4/STM32F4xxFlashSector.hpp>
 
-char keyBuf[256];
 STM32F4xxFlashSector sector(0x081E0000, 128 * 1024);
+//! [How to declare]
+
+char keyBuf[256];
 
 static void printMenu() {
   printf("Usage:\n");
