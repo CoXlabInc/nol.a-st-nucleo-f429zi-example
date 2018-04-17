@@ -8,12 +8,10 @@
 //#define MEASURE_CURRENT_IN_SLEEP
 
 Timer timerHello;
+Timer timerAdc;
 USBD_HandleTypeDef usb;
 
-static void taskHello(void *) {
-  Serial.println("Serial) Hello World!");
-  Serial2.println("Serial2) Hello World!");
-
+static void taskAdc(void *) {
   Serial.printf("A0:%5d mV, ", map(analogRead(A0), 0, 4095, 0, 3300));
   Serial.printf("A1:%5d mV, ", map(analogRead(A1), 0, 4095, 0, 3300));
   Serial.printf("A2:%5d mV, ", map(analogRead(A2), 0, 4095, 0, 3300));
@@ -23,6 +21,11 @@ static void taskHello(void *) {
   Serial.printf("A6:%5d mV, ", map(analogRead(A6), 0, 4095, 0, 3300));
   Serial.printf("A7:%5d mV, ", map(analogRead(A7), 0, 4095, 0, 3300));
   Serial.printf("A8:%5d mV\n", map(analogRead(A8), 0, 4095, 0, 3300));
+}
+
+static void taskHello(void *) {
+  Serial.println("Serial) Hello World!");
+  Serial2.println("Serial2) Hello World!");
 
   digitalToggle(PB14);
 }
@@ -98,4 +101,7 @@ void setup() {
 
   timerHello.onFired(taskHello, NULL);
   timerHello.startPeriodic(1000);
+
+  timerAdc.onFired(taskAdc, NULL);
+  timerAdc.startPeriodic(5000);
 }
