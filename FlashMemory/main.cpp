@@ -126,7 +126,7 @@ static void eventSerialReceived(SerialPort &) {
 
 void setup() {
   Serial.begin(115200);
-  printf("\n*** [ST Nucleo-F429ZI] Config Memory Test ***\n");
+  printf("\n*** [ST Nucleo-F429ZI] Internal Flash Memory (sector) Test ***\n");
 
   Serial.onReceive(eventSerialReceived);
   Serial.inputKeyboard(keyBuf, sizeof(keyBuf) - 1);
