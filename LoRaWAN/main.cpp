@@ -314,6 +314,39 @@ static void moveCursor(int8_t x, int8_t y) {
   USBD_HID_SendReport(&usb, buf, 4);
 }
 
+static void changeClass() {
+  LoRaMacFrame *f = new LoRaMacFrame(20);
+  if (f == NULL) {
+    printf("- Not enough memory\n");
+    return;
+  }
+
+  if (LoRaWAN.getDeviceClass() == LoRaMac::CLASS_A) {
+    printf("- Change class A to C\n");
+    f->len = sprintf((char *) f->buf, "\"class\":\"C\"");
+  } else {
+    printf("- Change class C to A\n");
+    f->len = sprintf((char *) f->buf, "\"class\":\"A\"");
+  }
+
+  f->port = 223;
+  f->type = LoRaMacFrame::CONFIRMED;
+  error_t err = LoRaWAN.send(f);
+  printf(
+    "* Sending class configuration message (%s (%u byte)): %d\n",
+    f->buf, f->len, err
+  );
+  if (err == ERROR_SUCCESS) {
+    if (LoRaWAN.getDeviceClass() == LoRaMac::CLASS_A) {
+      LoRaWAN.setDeviceClass(LoRaMac::CLASS_C);
+    } else {
+      LoRaWAN.setDeviceClass(LoRaMac::CLASS_A);
+    }
+  } else {
+    delete f;
+  }
+}
+
 static void eventSerialRx(SerialPort &p) {
   while (p.available() > 0) {
     char c = p.read();
@@ -345,6 +378,11 @@ static void eventSerialRx(SerialPort &p) {
       case 'D':
       // Right
       moveCursor(5, 0);
+      break;
+
+      case 'c':
+      case 'C':
+      changeClass();
       break;
     }
   }
