@@ -24,8 +24,11 @@ static void taskAdc(void *) {
 }
 
 static void taskHello(void *) {
-  Serial.println("Serial) Hello World!");
-  Serial2.println("Serial2) Hello World!");
+  struct timeval t;
+  gettimeofday(&t, NULL);
+
+  Serial.printf("[%lu.%06lu] (Serial) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
+  Serial2.printf("[%lu.%06lu] (Serial2) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
 
   digitalToggle(PB14);
 }
@@ -100,7 +103,7 @@ void setup() {
   attachInterrupt(PC13, eventUserKeyPressed, RISING);
 
   timerHello.onFired(taskHello, NULL);
-  timerHello.startPeriodic(1000);
+  timerHello.startPeriodic(500);
 
   timerAdc.onFired(taskAdc, NULL);
   timerAdc.startPeriodic(5000);
