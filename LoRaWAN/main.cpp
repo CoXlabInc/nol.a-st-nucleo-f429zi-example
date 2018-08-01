@@ -47,7 +47,7 @@ static void taskPeriodicSend(void *) {
   LoRaMacFrame *f = new LoRaMacFrame(255);
   if (!f) {
     printf("* Out of memory\n");
-    return NULL;
+    return;
   }
 
   f->port = 1;
@@ -60,7 +60,7 @@ static void taskPeriodicSend(void *) {
   // f->modulation = Radio::MOD_LORA;
   // f->meta.LoRa.bw = Radio::BW_125kHz;
   // f->meta.LoRa.sf = Radio::SF7;
-  // f->power = 10;
+  // f->power = 1; /* Index 1 => MaxEIRP - 2 dBm */
   f->numTrials = 5;
 
   error_t err = LoRaWAN.send(f);
@@ -80,7 +80,8 @@ static void eventLoRaWANJoin(
   const uint8_t *joinedNwkSKey,
   const uint8_t *joinedAppSKey,
   uint32_t joinedDevAddr,
-  const RadioPacket &frame
+  const RadioPacket &frame,
+  uint32_t airTime
 ) {
 #if (OVER_THE_AIR_ACTIVATION == 1)
   if (joined) {
@@ -128,7 +129,7 @@ static void eventLoRaWANSendDone(LoRaMac &, LoRaMacFrame *frame) {
   timerSend.startOneShot(10000);
 }
 
-static void eventLoRaWANReceive(LoRaMac &, const LoRaMacFrame *frame) {
+static void eventLoRaWANReceive(LoRaMac &lw, const LoRaMacFrame *frame) {
   printf("* Received: destined for port[%u], Freq:%lu Hz, RSSI:%d dB", frame->port, frame->freq, frame->power);
   if (frame->modulation == Radio::MOD_LORA) {
     const char *strBW[] = { "Unknown", "125kHz", "250kHz", "500kHz", "Unexpected value" };
@@ -153,7 +154,21 @@ static void eventLoRaWANReceive(LoRaMac &, const LoRaMacFrame *frame) {
   for (uint8_t i = 0; i < frame->len; i++) {
     printf(" %02X", frame->buf[i]);
   }
-  printf("\n");
+  printf(" (%u byte)\n", frame->len);
+
+  if (
+    (frame->type == LoRaMacFrame::CONFIRMED || lw.framePending) &&
+    lw.getNumPendingSendFrames() == 0
+  ) {
+    // If there is no pending send frames, send an empty frame to ack or pull more frames.
+    LoRaMacFrame *emptyFrame = new LoRaMacFrame(0);
+    if (emptyFrame) {
+      error_t err = LoRaWAN.send(emptyFrame);
+      if (err != ERROR_SUCCESS) {
+        delete emptyFrame;
+      }
+    }
+  }
 }
 
 static void eventLoRaWANJoinRequested(LoRaMac &, uint32_t frequencyHz, const LoRaMac::DatarateParams_t &dr) {
