@@ -23,16 +23,6 @@ static void taskAdc(void *) {
   Serial.printf("A8:%5d mV\n", map(analogRead(A8), 0, 4095, 0, 3300));
 }
 
-static void taskHello(void *) {
-  struct timeval t;
-  gettimeofday(&t, NULL);
-
-  Serial.printf("[%lu.%06lu] (Serial) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
-  Serial2.printf("[%lu.%06lu] (Serial2) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
-
-  digitalToggle(PB14);
-}
-
 static void eventSerialRx(SerialPort &p) {
   while (p.available() > 0) {
     char c = p.read();
@@ -60,6 +50,16 @@ static void eventUserKeyPressed() {
 
   Serial.println("* User key is pressed.");
 
+}
+
+static void taskHello(void *) {
+  struct timeval t;
+  gettimeofday(&t, NULL);
+
+  Serial.printf("[%lu.%06lu] (Serial) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
+  Serial2.printf("[%lu.%06lu] (Serial2) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
+
+  digitalToggle(PB14);
 }
 
 void setup() {
@@ -107,4 +107,7 @@ void setup() {
 
   timerAdc.onFired(taskAdc, NULL);
   timerAdc.startPeriodic(5000);
+
+  pinMode(D3, INPUT_PULLUP);
+  attachInterrupt(D3, eventUserKeyPressed, FALLING);
 }
