@@ -1,4 +1,5 @@
 #include <cox.h>
+#include <Timer.hpp>
 #include "usbd_conf.h"
 #include "usbd_core.h"
 #include "usbd_hid.h"
@@ -10,6 +11,7 @@
 Timer timerHello;
 Timer timerAdc;
 USBD_HandleTypeDef usb;
+uint16_t countNoInit __attribute__((section(".noinit")));
 
 static void taskAdc(void *) {
   Serial.printf("A0:%5d mV, ", map(analogRead(A0), 0, 4095, 0, 3300));
@@ -49,15 +51,16 @@ static void eventUserKeyPressed() {
   USBD_HID_SendReport(&usb, buf, 4);
 
   Serial.println("* User key is pressed.");
-
 }
 
 static void taskHello(void *) {
   struct timeval t;
   gettimeofday(&t, NULL);
 
-  Serial.printf("[%lu.%06lu] (Serial) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
-  Serial2.printf("[%lu.%06lu] (Serial2) Hello World!\n", (uint32_t) t.tv_sec, t.tv_usec);
+  Serial.printf("[%lu.%06lu] (Serial) Hello World! count:%u\n", (uint32_t) t.tv_sec, t.tv_usec, countNoInit);
+  Serial2.printf("[%lu.%06lu] (Serial2) Hello World! count:%u\n", (uint32_t) t.tv_sec, t.tv_usec, countNoInit);
+
+  countNoInit++;
 
   digitalToggle(PB14);
 }
@@ -74,16 +77,16 @@ void setup() {
   Serial.begin(115200);
   Serial.println("*** [ST Nucleo-F429ZI] Basic Functions ***");
   Serial.onReceive(eventSerialRx);
-  #ifndef MEASURE_CURRENT_IN_SLEEP
+#ifndef MEASURE_CURRENT_IN_SLEEP
   Serial.listen();
-  #endif
+#endif
 
   Serial2.begin(115200);
   Serial2.println("*** [ST Nucleo-F429ZI] Basic Functions ***");
   Serial2.onReceive(eventSerialRx);
-  #ifndef MEASURE_CURRENT_IN_SLEEP
+#ifndef MEASURE_CURRENT_IN_SLEEP
   Serial2.listen();
-  #endif
+#endif
 
   USBD_StatusTypeDef s;
   if ((s = USBD_Init(&usb, &hid, 0)) != USBD_OK) {
@@ -107,7 +110,4 @@ void setup() {
 
   timerAdc.onFired(taskAdc, NULL);
   timerAdc.startPeriodic(5000);
-
-  pinMode(D3, INPUT_PULLUP);
-  attachInterrupt(D3, eventUserKeyPressed, FALLING);
 }
