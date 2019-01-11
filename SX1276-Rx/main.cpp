@@ -40,7 +40,7 @@ static void printRxDone(void *args) {
   delete rxFrame;
 }
 
-static void eventOnRxDone(void *ctx) {
+static void eventOnRxDone(void *, GPIOInterruptInfo_t *) {
   tRxDone = micros();
   digitalWrite(PC9, LOW);
 
@@ -57,7 +57,7 @@ static void eventOnRxDone(void *ctx) {
   //SX1276.cca();
 }
 
-static void eventOnChannelBusy(void *ctx) {
+static void eventOnChannelBusy(void *, GPIOInterruptInfo_t *) {
   printf("Channel Busy!!\n");
   SX1276.cca();
 }
@@ -66,7 +66,7 @@ static void printRxStarted(void *args) {
   printf("[%lu us] Rx is started... (%d dB)\n", tRxStarted, rssiRxStarted);
 }
 
-static void eventOnRxStarted(void *ctx) {
+static void eventOnRxStarted(void *, GPIOInterruptInfo_t *) {
   digitalWrite(PC9, HIGH);
   tRxStarted = micros();
   rssiRxStarted = SX1276.getRssi();
@@ -103,9 +103,9 @@ static void appStart() {
   }
 
   SX1276.setChannel(917100000);
-  SX1276.onRxStarted(eventOnRxStarted, NULL);
-  SX1276.onRxDone(eventOnRxDone, NULL);
-  SX1276.onChannelBusy(eventOnChannelBusy, NULL);
+  SX1276.onRxStarted = eventOnRxStarted;
+  SX1276.onRxDone = eventOnRxDone;
+  SX1276.onChannelBusy = eventOnChannelBusy;
   SX1276.wakeup();
   //SX1276.cca();
 
