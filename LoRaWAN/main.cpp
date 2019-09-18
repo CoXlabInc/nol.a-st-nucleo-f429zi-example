@@ -1,4 +1,5 @@
 #include <cox.h>
+#include <algorithm>
 #include <LoRaMacKR920SKT.hpp>
 #include <ctype.h>
 #include "SX1276Wiring.hpp"
@@ -130,31 +131,13 @@ static void eventLoRaWANSendDone(LoRaMac &, LoRaMacFrame *frame) {
 }
 
 static void eventLoRaWANReceive(LoRaMac &lw, const LoRaMacFrame *frame) {
-  printf("* Received: destined for port[%u], Freq:%lu Hz, RSSI:%d dB", frame->port, frame->freq, frame->power);
-  if (frame->modulation == Radio::MOD_LORA) {
-    const char *strBW[] = { "Unknown", "125kHz", "250kHz", "500kHz", "Unexpected value" };
-    printf(", LoRa, SF:%u, BW:%s", frame->meta.LoRa.sf, strBW[min(frame->meta.LoRa.bw, 4)]);
-  } else if (frame->modulation == Radio::MOD_FSK) {
-    printf(", FSK");
-  } else {
-    printf("Unkndown modulation");
-  }
-  if (frame->type == LoRaMacFrame::UNCONFIRMED) {
-    printf(", Type:UNCONFIRMED,");
-  } else if (frame->type == LoRaMacFrame::CONFIRMED) {
-    printf(", Type:CONFIRMED,");
-  } else if (frame->type == LoRaMacFrame::MULTICAST) {
-    printf(", Type:MULTICAST,");
-  } else if (frame->type == LoRaMacFrame::PROPRIETARY) {
-    printf(", Type:PROPRIETARY,");
-  } else {
-    printf(", unknown type,");
-  }
-
+  printf("* Received:");
   for (uint8_t i = 0; i < frame->len; i++) {
     printf(" %02X", frame->buf[i]);
   }
-  printf(" (%u byte)\n", frame->len);
+  printf(" (");
+  frame->printTo(Serial);
+  printf(")\n");
 
   if (
     (frame->type == LoRaMacFrame::CONFIRMED || lw.framePending) &&
@@ -202,14 +185,13 @@ static void printChannelInformation(LoRaMac &lw) {
   const LoRaMac::DatarateParams_t *dr = lw.getDatarate(lw.getCurrentDatarateIndex());
   printf(" - Default DR%u:", lw.getCurrentDatarateIndex());
   if (dr->mod == Radio::MOD_LORA) {
-    const char *strBW[] = {
-      "Unknown", "125kHz", "250kHz", "500kHz", "Unexpected value"
-    };
-    printf(
-      "LoRa(SF%u BW:%s)\n",
-      dr->param.LoRa.sf,
-      strBW[min(dr->param.LoRa.bw, 4)]
-    );
+    printf("LoRa(SF%u BW:", dr->param.LoRa.sf);
+    switch (dr->param.LoRa.bw) {
+    case Radio::BW_125kHz: printf("125kHz\n"); break;
+    case Radio::BW_250kHz: printf("250kHz\n"); break;
+    case Radio::BW_500kHz: printf("500kHz\n"); break;
+    default: printf("(unexpected:%u)\n", dr->param.LoRa.bw); break;
+    }
   } else if (dr->mod == Radio::MOD_FSK) {
     printf("FSK\n");
   } else {
