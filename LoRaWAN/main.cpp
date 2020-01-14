@@ -198,14 +198,7 @@ static void printChannelInformation(LoRaMac &lw) {
     printf("Unknown modulation\n");
   }
 
-  int8_t power = lw.getTxPower(lw.getCurrentTxPowerIndex());
-  printf(" - Default Tx: ");
-  if (power == -127) {
-    printf("unexpected value\n");
-  } else {
-    printf("%d dBm\n", power);
-  }
-
+  printf(" - Default Tx index: %d\n", lw.getCurrentTxPowerIndex());
   printf(
     " - # of repetitions of unconfirmed uplink frames: %u\n",
     lw.getNumRepetitions()
