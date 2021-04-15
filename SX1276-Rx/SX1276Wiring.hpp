@@ -19,6 +19,8 @@ public:
     int8_t pinDIO4
   );
 
+  bool checkFrequency(uint32_t) override;
+
 protected:
   bool usingPaBoost(uint32_t channel);
 };
