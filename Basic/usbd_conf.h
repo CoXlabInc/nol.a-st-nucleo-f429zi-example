@@ -10,11 +10,8 @@
 #define USBD_SELF_POWERED                     1
 #define USBD_DEBUG_LEVEL                      0
 
-void *dynamicMalloc(uint16_t len);
-void dynamicFree(void *ptr);
-
-#define USBD_malloc     dynamicMalloc
-#define USBD_free       dynamicFree
+#define USBD_malloc     malloc
+#define USBD_free       free
 #define USBD_memset     memset
 #define USBD_memcpy     memcpy
 
